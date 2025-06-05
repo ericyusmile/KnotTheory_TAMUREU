@@ -1,6 +1,7 @@
 import csv
 import snappy
 from snappy import *
+from alexander_poly import alexander_presentation, alexander_nullity, alexander_polynomial
 
 def sig_zero(L):
     return (L.signature() == 0)
@@ -14,9 +15,16 @@ def linking_matrix_zero(L):
                 output = False
     return output
 
-#placeholder
 def fox_milnor(L):
-    return ""
+    n = len(L.link_components)
+    # Check Alexander nullity
+    M = alexander_presentation(L)
+    if alexander_nullity(L) != n - 1:
+        return False
+
+    # Check polynomial condition TODO
+    a_poly = alexander_polynomial(M, n - 1)
+    return True
 
 #helper function for eisermann
 def signed_determinant(K):
@@ -29,7 +37,7 @@ def eisermann(L):
     q = jones_L.parent().gen()
     jones_unlink = (q + q^(-1))^(n-1)
     if not jones_unlink.divides(jones_L):
-        return false
+        return False
     quotient = jones_L / jones_unlink
     determinant_product = 1
     for component in L.link_components:
@@ -42,21 +50,28 @@ def eisermann(L):
     return False
 
 
-def test(L):
+def test(L, writer):
     a = sig_zero(L)
+    if not a:
+        return
+
     b = linking_matrix_zero(L)
+    if not b:
+        return
+
     c = fox_milnor(L)
+    if not c:
+        return
+
     d = eisermann(L)
-    if (a and b):
-        print("hit!")
-        with open("output.csv", mode="a", newline="") as file:
-            writer = csv.writer(file)
-            writer.writerow([
-                L.PD_code(), 
-                len(L.link_components),
-                len(L.crossings), 
-                a, 
-                b, 
-                c, 
-                d
-            ])
+
+    print("hit! ", len(L.link_components), len(L.crossings))
+    writer.writerow([
+        L.PD_code(), 
+        len(L.link_components),
+        len(L.crossings), 
+        a, 
+        b, 
+        c, 
+        d
+    ])

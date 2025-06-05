@@ -84,10 +84,9 @@ def convert_laurent_to_poly(elt, expshift, P):
        return P(0)
    return sum( [  c*prod([g**e for g, e in zip(P.gens(), vector(exps) + expshift)]) for c, exps in zip(elt.coefficients(), uniform_poly_exponents(elt))])
 
-def alexander_presentation(knot, d):
+def alexander_presentation(knot):
     manifold = knot.exterior()
     G = manifold.fundamental_group()
-    n = G.num_generators()
     
     # Fox derivative calculation of Alexandar Module
     phi = MapToGroupRingOfFreeAbelianization(G)
@@ -95,13 +94,20 @@ def alexander_presentation(knot, d):
     P = PolynomialRing(R.base_ring(), list(R.gens_dict().keys()))
     M = [[fox_derivative(rel, phi, var)  for rel in G.relators()] for  var in G.generators()]
     expshift = -minimum_exponents(join_lists(M))
-    M = matrix(P, [[ convert_laurent_to_poly(p, expshift, P) for p in row] for row in M])
-    alex_poly = gcd(M.minors(G.num_generators() - d - 1))
     
+    return matrix(P, [[ convert_laurent_to_poly(p, expshift, P) for p in row] for row in M])
+
+
+def alexander_nullity(M):
     # Compute Alexandar Nullity
+    n = M.nrows()
     F = M[0][0].parent().fraction_field()
     M_frac = M.change_ring(F)
-    beta = n - M_frac.rank() - 1
+    return n - M_frac.rank() - 1
+
+def alexander_polynomial(M, d):
+    n = M.nrows()
+    alex_poly = gcd(M.minors(n - d - 1))
     
     # Normalize Alexandar Polynomial
-    return convert_laurent_to_poly(alex_poly, -minimum_exponents( [alex_poly] ), P), beta
+    return convert_laurent_to_poly(alex_poly, -minimum_exponents( [alex_poly] ), M[0][0].parent())
