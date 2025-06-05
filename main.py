@@ -10,7 +10,7 @@ def generate_links(num_links, file, max_crossings=30, components=2):
     writer = csv.writer(file)
 
     for i in range(num_links):
-        test(random_link(crossings = max_crossings, num_components=components, initial_map_gives_link=True, simplify="global"))
+        test(random_link(crossings = max_crossings, num_components=components, initial_map_gives_link=True, simplify="global"), writer)
 
 
 def parse_commands():
