@@ -65,6 +65,7 @@ def zeroify_simple(L):
             link_mat[component2][component1] += 1
     L._rebuild()
     L.simplify("global")
+    L = L.split_link_diagram()[0]
 
 def test(L, writer):
     a = sig_zero(L)
