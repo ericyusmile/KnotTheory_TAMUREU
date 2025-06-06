@@ -49,6 +49,23 @@ def eisermann(L):
         return True
     return False
 
+def zeroify_simple(L):
+    crossings = L.crossings
+    link_mat = L.linking_matrix()
+    for crossing in crossings:
+        component1 = crossing.strand_components[0]
+        component2 = crossing.strand_components[1]
+        if (link_mat[component1][component2] > 0 and crossing.sign == 1):
+            crossing.rotate_by_90()
+            link_mat[component1][component2] -= 1
+            link_mat[component2][component1] -= 1
+        if (link_mat[component1][component2] < 0 and crossing.sign == -1):
+            crossing.rotate_by_90()
+            link_mat[component1][component2] += 1
+            link_mat[component2][component1] += 1
+    L._rebuild()
+    L.simplify("global")
+    L = L.split_link_diagram()[0]
 
 def test(L, writer):
     a = sig_zero(L)
