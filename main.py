@@ -4,18 +4,21 @@ import sys
 from datetime import datetime
 from helpers import test
 
-HEADER = ["PD Code", "Alexander Polynomial", "Satisfies Eisermann"]
+HEADER = ["PD Code", "Num Components", "Num Crossings", "Signature 0", "Linking Matrix 0", "Alexander Polynomial", "Satisfies Eisermann"]
 
 def generate_links(num_links, file, max_crossings=30, components=2):
     writer = csv.writer(file)
 
     for i in range(num_links):
-        test(random_link(crossings = max_crossings, num_components=components, initial_map_gives_link=True, simplify="global"), writer)
+        L = random_link(crossings = max_crossings, num_components=components, initial_map_gives_link=True, simplify="global")
+        if len(L.link_components) < 2:
+            continue
+        test(L , writer)
 
 
 def parse_commands():
     # Defaults
-    file_name = "Links_" + str(datetime.now())
+    file_name = "Links_" + str(datetime.now()) + ".csv"
     num_links = 0
     max_crossings = 30
     num_components = 2
@@ -32,7 +35,7 @@ def parse_commands():
     if max_crossings_input != '':
         max_crossings = int(max_crossings_input)
 
-    num_components_input = input("What is the maximum number of crossing you want?\n")
+    num_components_input = input("How many components do you want in your links?\n")
     if num_components_input != '':
         num_components = int(num_components_input)
 
@@ -43,3 +46,6 @@ def main():
 
     with open(file_name, 'w', newline='') as out_file:
         generate_links(num_links, out_file, max_crossings=max_crossings, components=num_components)
+
+if __name__ == '__main__':
+    main()

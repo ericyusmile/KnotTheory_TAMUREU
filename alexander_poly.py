@@ -1,6 +1,6 @@
 import snappy
-import sage
 import string
+import sage
 from sage.rings.fraction_field import FractionField
 from sage.all import Integers, vector, matrix, LaurentPolynomialRing, PolynomialRing, gcd, prod
 
@@ -62,6 +62,33 @@ def fox_derivative(word, phi, var):
         term =   R(0) if w.lower() != var else -phi(var.upper())
     return term + phi(w) * fox_derivative(word[1:], phi, var)
 
+def fox_derivative_r(words, phi, var, gens):
+    R = phi.range()
+    lookup_table = dict()
+    # Fill out lookup table base cases
+    for gen in gens:
+        lookup_table[gen] = R(0)
+        lookup_table[gen.upper()] = R(0)
+
+    lookup_table[var] = R(1)
+    lookup_table[var.upper()] = -phi(var.upper())
+
+    output = []
+    for word in words:
+        def fox_derivative_recursion(i, j):
+            if word[i:j] in lookup_table:
+                return lookup_table[word[i:j]]
+    
+            mid = (i + j) // 2
+            new_fox = fox_derivative_recursion(i, mid) + phi(word[i:mid]) * fox_derivative_recursion(mid, j)
+            if j - i < 10:
+                 lookup_table[word[i:j]] = new_fox
+            return new_fox
+
+        output.append(fox_derivative_recursion(0, len(word)))
+    
+    return output
+
 # It's best to deal with matrixes of polynomials rather than Laurent
 # polynomials, so we need to be able to clear denominators.  This add
 # to the complexity of the code.  
@@ -92,7 +119,8 @@ def alexander_presentation(knot):
     phi = MapToGroupRingOfFreeAbelianization(G)
     R = phi.range()
     P = PolynomialRing(R.base_ring(), list(R.gens_dict().keys()))
-    M = [[fox_derivative(rel, phi, var)  for rel in G.relators()] for  var in G.generators()]
+    M = [fox_derivative_r(G.relators(), phi, var, G.generators()) for  var in G.generators()]
+    #M = [[fox_derivative(rel, phi, var)  for rel in G.relators()] for  var in G.generators()]
     expshift = -minimum_exponents(join_lists(M))
     
     return matrix(P, [[ convert_laurent_to_poly(p, expshift, P) for p in row] for row in M])
