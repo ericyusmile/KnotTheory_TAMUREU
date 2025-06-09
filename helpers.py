@@ -158,3 +158,58 @@ def test(L, writer):
         c, 
         d
     ])
+
+def is_SplitPoly(poly1):
+    #Check if poly2 has even degree
+    variables = poly1.parent().gens()
+    variableArray = []
+    for var in variables:
+        variableArray.append(var)
+    boolean4 = True
+    for n in range(len(variableArray)):
+        if (poly1.degree(variableArray[n]) % 2 != 0):
+            boolean4 = False
+    if (boolean4):
+        #Check if poly2 has even number of factors
+        factor_list = []
+        for factor, multiplicity in poly1.factor():
+            for i in range(multiplicity): 
+                factor_list.append(factor)
+        if (len(factor_list) % 2 == 0):
+            #Cancel factors that satisfy Fox-Milnor
+            for i in range(len(factor_list)): 
+                boolean5 = False
+                while (factor_list[i] != 'y' and factor_list[i] != 'n'):
+                    factor1 = factor_list[i]
+                    factor2 = factor1
+                    inverseVariables = []
+                    for v in range(len(variableArray)):
+                        inverseVariables.append(variableArray[v]**(-1))
+                    factor2 = factor2(inverseVariables)
+                    degrees = []
+                    for n in range(len(variableArray)):
+                        degrees.append(factor1.degree(variableArray[n]))
+                    for d in range(len(degrees)):
+                        factor2 = factor2 * (variableArray[d]**degrees[d])
+                    for j in range(i+1,len(factor_list)):
+                        if not(boolean5):
+                            if (factor2 == factor_list[j] or factor2 == -(factor_list[j])):
+                                factor_list[i] = 'y'
+                                factor_list[j] = 'y'
+                                boolean5 = True
+                    if not(boolean5):
+                        factor_list[i] = 'n'
+            test = []
+            for i in range(len(factor_list)):
+                test.append('y')
+            #Test if all factors cancelled
+            if (test == factor_list):
+                return True
+            else:
+                return False
+        #poly2 does not have even number of factors
+        else: 
+            return False
+    #poly2 does not have even degree
+    else: 
+        return False
