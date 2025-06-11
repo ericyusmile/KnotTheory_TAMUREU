@@ -2,7 +2,7 @@ from snappy import *
 import csv
 import sys
 from datetime import datetime
-from helpers import test
+import test
 
 HEADER = ["PD Code", "Num Components", "Num Crossings", "Signature 0", "Linking Matrix 0", "Alexander Polynomial", "Satisfies Eisermann"]
 
