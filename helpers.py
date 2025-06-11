@@ -2,6 +2,7 @@ import csv
 import snappy
 from snappy import *
 from .alexander_poly import alexander_presentation, alexander_nullity, alexander_polynomial
+from sage.all import *
 
 def sig_zero(L):
     return (L.signature() == 0)
