@@ -35,7 +35,7 @@ def eisermann(L):
     n = len(L.link_components)
     jones_L = L.jones_polynomial()
     q = jones_L.parent().gen()
-    jones_unlink = (q + q^(-1))^(n-1)
+    jones_unlink = (q + q**(-1))**(n-1)
     if not jones_unlink.divides(jones_L):
         return False
     quotient = jones_L / jones_unlink
