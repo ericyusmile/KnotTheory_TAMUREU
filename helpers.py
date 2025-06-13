@@ -1,8 +1,7 @@
 import csv
 import snappy
 from snappy import *
-from .alexander_poly import alexander_presentation, alexander_nullity, alexander_polynomial
-from sage.all import *
+from alexander_poly import alexander_presentation, alexander_nullity, alexander_polynomial
 
 def sig_zero(L):
     return (L.signature() == 0)
@@ -32,13 +31,16 @@ def signed_determinant(K):
     V = K.seifert_matrix()
     return (-I * (V + V.transpose())).determinant()
 
+#returns a pair of booleans. The first one is true if the divisibility condition of eisermann is satisfied,
+#and the second one is true if the mod 32 condition is satisfied.
 def eisermann(L):
     n = len(L.link_components)
     jones_L = L.jones_polynomial()
     q = jones_L.parent().gen()
     jones_unlink = (q + q**(-1))**(n-1)
     if not jones_unlink.divides(jones_L):
-        return False
+        print("no divides")
+        return (False, False)
     quotient = jones_L / jones_unlink
     determinant_product = 1
     for component in L.link_components:
@@ -47,8 +49,8 @@ def eisermann(L):
             determinant_product *= real(signed_determinant(K))
     quotientI = quotient(I)
     if (quotientI.imag_part() == 0 and quotientI.real() % 32 == determinant_product % 32):
-        return True
-    return False
+        return (True, True)
+    return (True, False)
 
 def zeroify_simple(L):
     crossings = L.crossings
@@ -143,22 +145,23 @@ def test(L, writer):
     if not b:
         return
 
-    c = fox_milnor(L)
-    if (not c) and (len(L.link_components) > 2):
+    d = eisermann(L)
+    if d[1]:
         return
 
-    d = eisermann(L)
+    c = fox_milnor(L)
 
-    print("hit! ", len(L.link_components), len(L.crossings))
-    writer.writerow([
-        L.PD_code(), 
-        len(L.link_components),
-        len(L.crossings), 
-        a, 
-        b, 
-        c, 
-        d
-    ])
+    if c[0] or (len(L.link_components) == 2 and (not d[0])):
+        print("hit! ", len(L.link_components), len(L.crossings))
+        writer.writerow([
+            L.PD_code(), 
+            len(L.link_components),
+            len(L.crossings), 
+            a, 
+            b, 
+            c, 
+            d
+        ])
 
 def is_SplitPoly(poly1):
     #Check if poly2 has even degree
